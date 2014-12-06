@@ -1,0 +1,35 @@
+# coding: utf-8
+require 'openssl'
+require 'open-uri'
+
+latest_ver = 0
+
+# 最新バージョンの取得
+open("https://storage.googleapis.com/chromium-browser-continuous/Win/LAST_CHANGE") { |f|
+  latest_ver = f.read
+}
+# 最新バージョンの表示
+puts latest_ver
+
+file_size = 0
+
+# 保存ファイルの指定
+open("Win-"+latest_ver+"-chromium-win32_.zip", "wb") {|saved_file|
+  # ダウンロードアドレスの指定
+  open("https://storage.googleapis.com/chromium-browser-continuous/Win/"+latest_ver+"/chrome-win32.zip",
+       # ファイルサイズ取得オプション
+       :content_length_proc => lambda {|content_length|
+         file_size = content_length
+       },
+       # ダウンロードしたブロックごとのサイズ取得オプション
+       :progress_proc => lambda {|size|
+         print "downloaded: "+(size*100/file_size).to_s+"%\t"+size.to_s+"/"+file_size.to_s+"\r"
+       }
+      ) {|download_file|
+    puts "Download"
+    # ファイルを保存
+    saved_file.write(download_file.read)
+  }
+}
+
+
