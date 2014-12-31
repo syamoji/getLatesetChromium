@@ -3,9 +3,19 @@ require 'openssl'
 require 'open-uri'
 
 latest_ver = 0
+downloadUrl = "https://storage.googleapis.com/chromium-browser-continuous/"#+os_platform+"/"+latest_ver+"/chrome-win32.zip"
+if os_platform = ARGV[0]
+  if os_platform != 'Mac' && os_platform != 'Win'
+    puts 'Usage: ruby getLatestChromium.rb [Mac|Win]'
+    exit
+  end
+else
+  puts 'Usage: ruby getLatestChromium.rb [Mac|Win]'
+  exit
+end
 
 # 最新バージョンの取得
-open("https://storage.googleapis.com/chromium-browser-continuous/Win/LAST_CHANGE") { |f|
+open(downloadUrl+""+os_platform+"/LAST_CHANGE") { |f|
   latest_ver = f.read
 }
 # 最新バージョンの表示
@@ -14,9 +24,14 @@ puts latest_ver
 file_size = 0
 
 # 保存ファイルの指定
-open("Win-"+latest_ver+"-chromium-win32_.zip", "wb") {|saved_file|
+open(os_platform+"-"+latest_ver+"-chromium.zip", "wb") {|saved_file|
   # ダウンロードアドレスの指定
-  open("https://storage.googleapis.com/chromium-browser-continuous/Win/"+latest_ver+"/chrome-win32.zip",
+  if os_platform == 'Win'
+    downloadUrl = downloadUrl+""+os_platform+"/"+latest_ver+"/chrome-win32.zip"
+  else
+    downloadUrl = downloadUrl+""+os_platform+"/"+latest_ver+"/chrome-mac.zip"
+  end
+  open(downloadUrl,
        # ファイルサイズ取得オプション
        :content_length_proc => lambda {|content_length|
          file_size = content_length
